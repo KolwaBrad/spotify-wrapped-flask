@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Spotify Wrapped</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --spotify-green: #1DB954;
+            --spotify-black: #121212;
+            --spotify-dark-gray: #212121;
+            --spotify-light-gray: #535353;
+            --spotify-white: #FFFFFF;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--spotify-black);
+            color: var(--spotify-white);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo svg {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: var(--spotify-dark-gray);
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-name {
+            font-weight: 600;
+        }
+        
+        main {
+            margin-top: 100px;
+            padding-bottom: 50px;
+        }
+        
+        .section {
+            padding: 40px 0;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background-color: var(--spotify-dark-gray);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+        
+        .section-icon {
+            color: var(--spotify-green);
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            background-color: var(--spotify-black);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .card-content {
+            padding: 15px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .card-subtitle {
+            color: #b3b3b3;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+        
+        .stat-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .stat-card {
+            background-color: var(--spotify-black);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 1 1 300px;
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .stat-card:last-child {
+            margin-right: 0;
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--spotify-green), #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-label {
+            color: #b3b3b3;
+            font-size: 1rem;
+        }
+        
+        .timeline {
+            padding: 30px 20px;
+            position: relative;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background-color: var(--spotify-green);
+        }
+        
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+        
+        .timeline-content {
+            width: 45%;
+            padding: 20px;
+            background-color: var(--spotify-black);
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--spotify-green);
+            border-radius: 50%;
+            top: 20px;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content::after {
+            left: -30px;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-content::after {
+            right: -30px;
+        }
+        
+        .timeline-date {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--spotify-green);
+        }
+        
+        .heatmap-container {
+            overflow-x: auto;
+            padding: 20px;
+        }
+        
+        .heatmap-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .heatmap-table th, .heatmap-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--spotify-light-gray);
+        }
+        
+        .heatmap-table th {
+            background-color: var(--spotify-black);
+            font-weight: 600;
+        }
+        
+        .heatmap-cell {
+            border-radius: 4px;
+            transition: transform 0.3s;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--spotify-light-gray);
+            padding: 0 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: var(--spotify-white);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: var(--spotify-green);
+            transition: width 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: var(--spotify-green);
+        }
+        
+        .tab-btn.active::after {
+            width: 100%;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: var(--spotify-light-gray);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--spotify-green);
+            border-radius: 5px;
+            transition: width 1.5s ease-in-out;
+        }
+        
+        .comparison-container {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .comparison-arrow {
+            font-size: 2rem;
+            margin: 0 20px;
+            color: var(--spotify-green);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--spotify-black);
+            z-index: 2000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--spotify-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .error {
+            color: #ff5252;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .sparkle {
+            position: absolute;
+            background-color: var(--spotify-green);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(180deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .stat-container {
+                flex-direction: column;
+            }
+            
+            .stat-card {
+                margin-right: 0;
+                width: 100%;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-item, .timeline-item:nth-child(odd) {
+                flex-direction: column;
+                margin-left: 40px;
+            }
+            
+            .timeline-content {
+                width: 100%;
+            }
+            
+            .timeline-item .timeline-content::after, 
+            .timeline-item:nth-child(odd) .timeline-content::after {
+                left: -30px;
+                right: auto;
+            }
+            
+            .comparison-container {
+                flex-direction: column;
+            }
+            
+            .comparison-arrow {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Confetti animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="256" cy="256" r="256" fill="#1DB954"/>
+                    <path d="M371.2 254.4C308 214.4 179.2 209.6 104.8 238.4C93.6 242.4 81.6 236 77.6 224.8C73.6 213.6 80 201.6 91.2 197.6C176 164.8 318.4 170.4 392.8 216.8C402.4 222.4 406.4 235.2 400.8 244.8C395.2 254.4 382.4 258.4 371.2 254.4ZM369.6 302.4C364.8 310.4 354.4 313.6 346.4 308.8C292.8 274.4 196.8 266.4 118.4 292.8C109.6 296 100 291.2 96.8 282.4C93.6 273.6 98.4 264 107.2 260.8C195.2 231.2 300 240 362.4 278.4C370.4 283.2 373.6 293.6 369.6 302.4ZM344 349.6C340 356 332 358.4 325.6 354.4C279.2 324.8 208.8 317.6 123.2 340C116 342.4 108.8 338.4 106.4 331.2C104 324 108 316.8 115.2 314.4C208.8 290.4 286.4 298.4 339.2 332C345.6 336 348 344 344 349.6Z" fill="white"/>
+                </svg>
+                <span class="logo-text">Your Wrapped</span>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    {% if user.images and user.images|length > 0 %}
+                        <img src="{{ user.images[0].url }}" alt="{{ user.display_name }}">
+                    {% else %}
+                        <i class="fas fa-user" style="font-size: 24px; padding: 8px;"></i>
+                    {% endif %}
+                </div>
+                <div class="user-name">{{ user.display_name }}</div>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <section class="section" id="welcome-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h1 class="section-title">Your 2024 Wrapped</h1>
+                    <span class="section-icon"><i class="fas fa-gift"></i></span>
+                </div>
+                
+                <div class="stat-container">
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                        <div class="stat-value" id="minutes-listened">0</div>
+                        <div class="stat-label">Minutes Listened</div>
+                    </div>
+                    
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                        <div class="stat-value" id="listener-percentile">0%</div>
+                        <div class="stat-label">Of Spotify Listeners</div>
+                    </div>
+                    
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="600">
+                        <div class="stat-value" id="top-genre">-</div>
+                        <div class="stat-label">Top Genre</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section" id="top-artists-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Your Top Artists</h2>
+                    <span class="section-icon"><i class="fas fa-microphone"></i></span>
+                </div>
+                
+                <div class="grid" id="top-artists-grid"></div>
+            </section>
+            
+            <section class="section" id="top-songs-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Your Top Songs</h2>
+                    <span class="section-icon"><i class="fas fa-music"></i></span>
+                </div>
+                
+                <div class="grid" id="top-songs-grid"></div>
+            </section>
+            
+            <section class="section" id="genres-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Your Top Genres</h2>
+                    <span class="section-icon"><i class="fas fa-guitar"></i></span>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <canvas id="genres-chart" height="300"></canvas>
+                </div>
+            </section>
+            
+            <section class="section" id="first-most-played-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">First Played & Most Played</h2>
+                    <span class="section-icon"><i class="fas fa-play-circle"></i></span>
+                </div>
+                
+                <div class="comparison-container">
+                    <div class="card" data-aos="fade-right">
+                        <div id="first-played-img" class="card-img" style="background-color: var(--spotify-dark-gray);"></div>
+                        <div class="card-content">
+                            <h3 class="card-title" id="first-played-title">-</h3>
+                            <p class="card-subtitle" id="first-played-artist">-</p>
+                            <p class="card-subtitle" id="first-played-date">-</p>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="card" data-aos="fade-left">
+                        <div id="most-played-img" class="card-img" style="background-color: var(--spotify-dark-gray);"></div>
+                        <div class="card-content">
+                            <h3 class="card-title" id="most-played-title">-</h3>
+                            <p class="card-subtitle" id="most-played-artist">-</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section" id="trends-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Your Music Journey</h2>
+                    <span class="section-icon"><i class="fas fa-chart-line"></i></span>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="trends-tab">Trends & Changes</button>
+                    <button class="tab-btn" data-tab="day-night-tab">Day & Night</button>
+                    <button class="tab-btn" data-tab="weekday-tab">Weekday Favorites</button>
+                    <button class="tab-btn" data-tab="monthly-tab">Monthly Hits</button>
+                </div>
+                
+                <div class="tab-content active" id="trends-tab">
+                    <div class="timeline" id="trends-timeline"></div>
+                </div>
+                
+                <div class="tab-content" id="day-night-tab">
+                    <div class="comparison-container">
+                        <div class="card" data-aos="fade-right" style="flex: 1;">
+                            <div class="card-content">
+                                <h3 class="card-title"><i class="fas fa-sun" style="color: #FFC107;"></i> Daytime Favorites</h3>
+                                <ul id="day-tracks" style="list-style: none; margin-top: 15px;"></ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card" data-aos="fade-left" style="flex: 1;">
+                            <div class="card-content">
+                                <h3 class="card-title"><i class="fas fa-moon" style="color: #7986CB;"></i> Nighttime Favorites</h3>
+                                <ul id="night-tracks" style="list-style: none; margin-top: 15px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="weekday-tab">
+                    <div style="overflow-x: auto;">
+                        <div style="min-width: 700px;">
+                            <canvas id="weekday-chart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="monthly-tab">
+                    <div class="heatmap-container">
+                        <table class="heatmap-table" id="monthly-heatmap"></table>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section" id="collaboration-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Top Collaborations</h2>
+                    <span class="section-icon"><i class="fas fa-users"></i></span>
+                </div>
+                
+                <div class="grid" id="collaborations-grid"></div>
+            </section>
+            
+            <section class="section" id="surprising-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Musical Surprises</h2>
+                    <span class="section-icon"><i class="fas fa-surprise"></i></span>
+                </div>
+                
+                <div class="comparison-container">
+                    <div class="card" data-aos="fade-right" style="flex: 1;">
+                        <div id="surprising-img" class="card-img" style="background-color: var(--spotify-dark-gray);"></div>
+                        <div class="card-content">
+                            <h3 class="card-title">Most Surprising Artist</h3>
+                            <p class="card-subtitle" id="surprising-name">-</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card" data-aos="fade-left" style="flex: 1;">
+                        <div id="guilty-img" class="card-img" style="background-color: var(--spotify-dark-gray);"></div>
+                        <div class="card-content">
+                            <h3 class="card-title">Guilty Pleasure</h3>
+                            <p class="card-subtitle" id="guilty-title">-</p>
+                            <p class="card-subtitle" id="guilty-artist">-</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section" id="seasonal-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Seasonal Breakdown</h2>
+                    <span class="section-icon"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="winter-tab">Winter</button>
+                    <button class="tab-btn" data-tab="spring-tab">Spring</button>
+                    <button class="tab-btn" data-tab="summer-tab">Summer</button>
+                    <button class="tab-btn" data-tab="fall-tab">Fall</button>
+                </div>
+                
+                <div class="tab-content active" id="winter-tab">
+                    <div class="grid" id="winter-grid"></div>
+                </div>
+                
+                <div class="tab-content" id="spring-tab">
+                    <div class="grid" id="spring-grid"></div>
+                </div>
+                
+                <div class="tab-content" id="summer-tab">
+                    <div class="grid" id="summer-grid"></div>
+                </div>
+                
+                <div class="tab-content" id="fall-tab">
+                    <div class="grid" id="fall-grid"></div>
+                </div>
+            </section>
+            
+            <section class="section" id="labels-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Favorite Record Labels</h2>
+                    <span class="section-icon"><i class="fas fa-record-vinyl"></i></span>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <canvas id="labels-chart" height="300"></canvas>
+                </div>
+            </section>
+            
+            <section class="section" id="predictions-section" data-aos="fade-up">
+                <div class="section-header">
+                    <h2 class="section-title">Future Predictions</h2>
+                    <span class="section-icon"><i class="fas fa-crystal-ball"></i></span>
+                </div>
+                
+                <div style="padding: 20px 20px 30px;">
+                    <p style="text-align: center; margin-bottom: 30px;">Based on your listening habits, here's what might be in your future...</p>
+                    <div class="grid" id="predictions-grid"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS animation library
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+        
+        // Global variables
+        let wrappedData = null;
+        const colors = [
+            '#1DB954', '#1ED760', '#2EBD59', '#57B660', '#7ED957',
+            '#A2DA50', '#C5DB47', '#E7DC3F', '#F7D036', '#F9A52B'
+        ];
+        
+        // Function to format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num;
+        }
+        
+        // Function to create artist cards
+        function createArtistCard(artist, index) {
+            const delay = index * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
+            
+            const img = document.createElement('div');
+            img.className = 'card-img';
+            
+            if (artist.image) {
+                img.style.backgroundImage = `url(${artist.image})`;
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+            } else {
+                img.style.backgroundColor = colors[index % colors.length];
+                const placeholder = document.createElement('div');
+                placeholder.style.width = '100%';
+                placeholder.style.height = '100%';
+                placeholder.style.display = 'flex';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.alignItems = 'center';
+                placeholder.innerHTML = `<i class="fas fa-user" style="font-size: 40px; color: white;"></i>`;
+                img.appendChild(placeholder);
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const title = document.createElement('h3');
+            title.className = 'card-title';
+            title.textContent = artist.name;
+            
+            const subtitle = document.createElement('p');
+            subtitle.className = 'card-subtitle';
+            subtitle.textContent = artist.genres ? artist.genres.slice(0, 2).join(', ') : '';
+            
+            content.appendChild(title);
+            content.appendChild(subtitle);
+            
+            card.appendChild(img);
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Function to create song cards
+        function createSongCard(song, index) {
+            const delay = index * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
+            
+            const img = document.createElement('div');
+            img.className = 'card-img';
+            
+            if (song.image) {
+                img.style.backgroundImage = `url(${song.image})`;
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+            } else {
+                img.style.backgroundColor = colors[index % colors.length];
+                const placeholder = document.createElement('div');
+                placeholder.style.width = '100%';
+                placeholder.style.height = '100%';
+                placeholder.style.display = 'flex';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.alignItems = 'center';
+                placeholder.innerHTML = `<i class="fas fa-music" style="font-size: 40px; color: white;"></i>`;
+                img.appendChild(placeholder);
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const title = document.createElement('h3');
+            title.className = 'card-title';
+            title.textContent = song.name;
+            
+            const subtitle = document.createElement('p');
+            subtitle.className = 'card-subtitle';
+            subtitle.textContent = song.artist;
+            
+            content.appendChild(title);
+            content.appendChild(subtitle);
+            
+            if (song.preview_url) {
+                const preview = document.createElement('audio');
+                preview.controls = true;
+                preview.style.width = '100%';
+                preview.style.marginTop = '10px';
+                preview.src = song.preview_url;
+                content.appendChild(preview);
+            }
+            
+            card.appendChild(img);
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Function to create collaboration cards
+        function createCollaborationCard(collab, index) {
+            const delay = index * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
+            
+            const img = document.createElement('div');
+            img.className = 'card-img';
+            
+            if (collab.image) {
+                img.style.backgroundImage = `url(${collab.image})`;
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+            } else {
+                img.style.backgroundColor = colors[index % colors.length];
+                const placeholder = document.createElement('div');
+                placeholder.style.width = '100%';
+                placeholder.style.height = '100%';
+                placeholder.style.display = 'flex';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.alignItems = 'center';
+                placeholder.innerHTML = `<i class="fas fa-users" style="font-size: 40px; color: white;"></i>`;
+                img.appendChild(placeholder);
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const title = document.createElement('h3');
+            title.className = 'card-title';
+            title.textContent = collab.track;
+            
+            const subtitle = document.createElement('p');
+            subtitle.className = 'card-subtitle';
+            subtitle.textContent = collab.artists.join(' & ');
+            
+            content.appendChild(title);
+            content.appendChild(subtitle);
+            
+            card.appendChild(img);
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Function to create seasonal track cards
+        function createSeasonalTrackCard(track, index) {
+            const delay = index * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const title = document.createElement('h3');
+            title.className = 'card-title';
+            title.textContent = track.name;
+            
+            const subtitle = document.createElement('p');
+            subtitle.className = 'card-subtitle';
+            subtitle.textContent = track.artist;
+            
+            content.appendChild(title);
+            content.appendChild(subtitle);
+            
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Function to create prediction cards
+        function createPredictionCard(prediction, index) {
+            const delay = index * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
+            
+            const img = document.createElement('div');
+            img.className = 'card-img';
+            
+            if (prediction.image) {
+                img.style.backgroundImage = `url(${prediction.image})`;
+                img.style.backgroundSize = 'cover';
+                img.style.backgroundPosition = 'center';
+            } else {
+                img.style.backgroundColor = colors[index % colors.length];
+                const placeholder = document.createElement('div');
+                placeholder.style.width = '100%';
+                placeholder.style.height = '100%';
+                placeholder.style.display = 'flex';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.alignItems = 'center';
+                placeholder.innerHTML = `<i class="fas fa-crystal-ball" style="font-size: 40px; color: white;"></i>`;
+                img.appendChild(placeholder);
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const title = document.createElement('h3');
+            title.className = 'card-title';
+            title.textContent = prediction.name;
+            
+            content.appendChild(title);
+            card.appendChild(img);
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Function to set up tab switching for both trends and seasonal sections
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetTab = btn.getAttribute('data-tab');
+                    // Remove active class from all tab buttons and contents
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                    // Activate the clicked button and its corresponding tab
+                    btn.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        }
+        
+        // Function to render the entire UI using the wrapped data
+        function renderWrappedData(data) {
+            // Welcome section
+            document.getElementById('minutes-listened').textContent = formatNumber(data.minutes_listened);
+            document.getElementById('listener-percentile').textContent = data.listener_percentile + "%";
+            if (data.top_genres && data.top_genres.length > 0) {
+                document.getElementById('top-genre').textContent = data.top_genres[0].genre;
+            }
+            
+            // Top artists grid
+            const topArtistsGrid = document.getElementById('top-artists-grid');
+            data.top_artists.forEach((artist, index) => {
+                topArtistsGrid.appendChild(createArtistCard(artist, index));
+            });
+            
+            // Top songs grid
+            const topSongsGrid = document.getElementById('top-songs-grid');
+            data.top_songs.forEach((song, index) => {
+                topSongsGrid.appendChild(createSongCard(song, index));
+            });
+            
+            // Genres chart using Chart.js
+            if (data.top_genres && data.top_genres.length > 0) {
+                const ctx = document.getElementById('genres-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.top_genres.map(g => g.genre),
+                        datasets: [{
+                            label: 'Count',
+                            data: data.top_genres.map(g => g.count),
+                            backgroundColor: colors,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // First played & Most played section
+            if (data.first_played) {
+                const fpImg = document.getElementById('first-played-img');
+                fpImg.style.backgroundImage = data.first_played.image ? `url(${data.first_played.image})` : '';
+                fpImg.style.backgroundSize = 'cover';
+                fpImg.style.backgroundPosition = 'center';
+                document.getElementById('first-played-title').textContent = data.first_played.name;
+                document.getElementById('first-played-artist').textContent = data.first_played.artist;
+                document.getElementById('first-played-date').textContent = new Date(data.first_played.date).toLocaleDateString();
+            }
+            if (data.most_played) {
+                const mpImg = document.getElementById('most-played-img');
+                mpImg.style.backgroundImage = data.most_played.image ? `url(${data.most_played.image})` : '';
+                mpImg.style.backgroundSize = 'cover';
+                mpImg.style.backgroundPosition = 'center';
+                document.getElementById('most-played-title').textContent = data.most_played.name;
+                document.getElementById('most-played-artist').textContent = data.most_played.artist;
+            }
+            
+            // Trends timeline
+            const trendsTimeline = document.getElementById('trends-timeline');
+            const trends = data.trends;
+            const terms = ['Short Term', 'Medium Term', 'Long Term'];
+            const termData = [trends.short_term, trends.medium_term, trends.long_term];
+            termData.forEach((list, i) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                const content = document.createElement('div');
+                content.className = 'timeline-content';
+                const dateElem = document.createElement('div');
+                dateElem.className = 'timeline-date';
+                dateElem.textContent = terms[i];
+                const text = document.createElement('p');
+                text.textContent = list.join(', ');
+                content.appendChild(dateElem);
+                content.appendChild(text);
+                item.appendChild(content);
+                trendsTimeline.appendChild(item);
+            });
+            
+            // Day & Night trends
+            const dayTracksList = document.getElementById('day-tracks');
+            data.day_night_trends.day.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} (${item.count})`;
+                dayTracksList.appendChild(li);
+            });
+            const nightTracksList = document.getElementById('night-tracks');
+            data.day_night_trends.night.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} (${item.count})`;
+                nightTracksList.appendChild(li);
+            });
+            
+            // Weekday chart: sum counts for each weekday
+            const weekdayLabels = [];
+            const weekdayData = [];
+            for (const [day, tracks] of Object.entries(data.weekday_tracks)) {
+                weekdayLabels.push(day);
+                const total = tracks.reduce((sum, cur) => sum + cur[1], 0);
+                weekdayData.push(total);
+            }
+            if (weekdayLabels.length > 0) {
+                const ctxWeekday = document.getElementById('weekday-chart').getContext('2d');
+                new Chart(ctxWeekday, {
+                    type: 'bar',
+                    data: {
+                        labels: weekdayLabels,
+                        datasets: [{
+                            label: 'Plays',
+                            data: weekdayData,
+                            backgroundColor: colors,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Monthly heatmap table
+            const monthlyHeatmap = document.getElementById('monthly-heatmap');
+            let tableHTML = '<tr><th>Month</th><th>Song 1</th><th>Song 2</th><th>Song 3</th><th>Song 4</th><th>Song 5</th></tr>';
+            for (const [month, tracks] of Object.entries(data.monthly_tracks)) {
+                tableHTML += `<tr><td>${month}</td>`;
+                for (let i = 0; i < 5; i++) {
+                    if (tracks[i]) {
+                        tableHTML += `<td>${tracks[i][0]} (${tracks[i][1]})</td>`;
+                    } else {
+                        tableHTML += '<td>-</td>';
+                    }
+                }
+                tableHTML += '</tr>';
+            }
+            monthlyHeatmap.innerHTML = tableHTML;
+            
+            // Collaborations grid
+            const collabGrid = document.getElementById('collaborations-grid');
+            data.top_collaborations.forEach((collab, index) => {
+                collabGrid.appendChild(createCollaborationCard(collab, index));
+            });
+            
+            // Musical Surprises: Most Surprising & Guilty Pleasure
+            if (data.most_surprising) {
+                const surprisingImg = document.getElementById('surprising-img');
+                surprisingImg.style.backgroundImage = data.most_surprising.image ? `url(${data.most_surprising.image})` : '';
+                surprisingImg.style.backgroundSize = 'cover';
+                surprisingImg.style.backgroundPosition = 'center';
+                document.getElementById('surprising-name').textContent = data.most_surprising.name;
+            }
+            if (data.guilty_pleasure) {
+                const guiltyImg = document.getElementById('guilty-img');
+                guiltyImg.style.backgroundImage = data.guilty_pleasure.image ? `url(${data.guilty_pleasure.image})` : '';
+                guiltyImg.style.backgroundSize = 'cover';
+                guiltyImg.style.backgroundPosition = 'center';
+                document.getElementById('guilty-title').textContent = data.guilty_pleasure.name;
+                document.getElementById('guilty-artist').textContent = data.guilty_pleasure.artist;
+            }
+            
+            // Seasonal breakdown grids
+            ['winter', 'spring', 'summer', 'fall'].forEach(season => {
+                const grid = document.getElementById(`${season}-grid`);
+                data.seasonal_breakdown[season].forEach((track, index) => {
+                    grid.appendChild(createSeasonalTrackCard(track, index));
+                });
+            });
+            
+            // Favorite record labels chart
+            if (data.favorite_labels && data.favorite_labels.length > 0) {
+                const ctxLabels = document.getElementById('labels-chart').getContext('2d');
+                new Chart(ctxLabels, {
+                    type: 'bar',
+                    data: {
+                        labels: data.favorite_labels.map(l => l.label),
+                        datasets: [{
+                            label: 'Count',
+                            data: data.favorite_labels.map(l => l.count),
+                            backgroundColor: colors,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Future predictions grid
+            const predictionsGrid = document.getElementById('predictions-grid');
+            data.future_predictions.forEach((prediction, index) => {
+                predictionsGrid.appendChild(createPredictionCard(prediction, index));
+            });
+        }
+        
+        // On DOMContentLoaded, fetch wrapped data and render the UI
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs();
+            fetch('/api/wrapped-data')
+                .then(response => response.json())
+                .then(data => {
+                    wrappedData = data;
+                    renderWrappedData(wrappedData);
+                })
+                .catch(err => {
+                    console.error('Error fetching wrapped data:', err);
+                    const mainContainer = document.querySelector('main .container');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.textContent = 'Failed to load your Spotify Wrapped data. Please try again later.';
+                    mainContainer.prepend(errorDiv);
+                })
+                .finally(() => {
+                    document.getElementById('loading').style.display = 'none';
+                });
+        });
+    </script>
