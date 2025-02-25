@@ -8,7 +8,6 @@ This is a Flask-based web application that allows Spotify users to view their Sp
 - **Top Artists & Songs**: View your most-listened-to artists and songs.
 - **Listening Stats**: Minutes listened, favorite genres, and ranking percentile.
 - **Trends & Changes**: See how your music taste has evolved.
-- **Year Selection**: Browse Wrapped data from 2022, 2023, 2024, and 2025.
 - **Charts & Visuals**: Interactive graphs for genres, listening times, and trends.
 
 ## Installation
@@ -63,4 +62,4 @@ The app will be available at: `http://127.0.0.1:5000`
 MIT License
 
 ## Author
-[KolwaBra] - GitHub: [https://github.com/KolwaBrad/]
+[KolwaBrad] - GitHub: [https://github.com/KolwaBrad/]
